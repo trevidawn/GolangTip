@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -15,32 +16,37 @@ var (
 )
 
 func main() {
+	/*
+	1. ticker Stop
+	*/
+	defaultTicker.Stop()
 
-	// 1. ticker Stop
+	//아무 에러 없음, nil ticker를 Stop하는 것은 문제가 되지 않는다.
+	nilTicker.Stop()
+	//segmentation err 발생! : invalid memory address or nil pointer dereference
 
-	//defaultTicker.Stop()
-	// 아무 에러 없음, nil ticker를 Stop하는 것은 문제가 되지 않는다.
+	/*
+	2. ticker.Reset
+	*/
+	defaultTicker.Reset(time.Second)
+	/*
+		의외로 panic 발생, Reset과정에 ticker 초기화과정이 포함될거라 생각했는데 아닌가봄
+		Reset called on uninitialized Ticker
+		추측하자면 ticker가 nil이기 때문에 ticker의 Channel이 없기 때문에 panic이 발생한거 같다.
+	*/
+	nilTicker.Reset(time.Second)
 
-	//nilTicker.Stop()
-	// segmentation err 발생! : invalid memory address or nil pointer dereference
-
-	// 2. ticker.Reset
-
-	//defaultTicker.Reset(time.Second)
-	// 의외로 panic 발생, Reset과정에 ticker 초기화과정이 포함될거라 생각했는데 아닌가봄
-	// Reset called on uninitialized Ticker
-	// 추측하자면 ticker가 nil이기 때문에 ticker의 Channel이 없기 때문에 panic이 발생한거 같다.
-
-	//nilTicker.Reset(time.Second)
-	// segmentation err 발생! : invalid memory address or nil pointer dereference
+	//segmentation err 발생! : invalid memory address or nil pointer dereference
 
 
-	// 3. 채널 읽기
+	/*
+	3. 채널 읽기
+	*/
 
-	//fmt.Println(<-defaultTicker.C)
-	// 에러 발생 : fatal error: all goroutines are asleep - deadlock!
-	// nil Ticker의 Chan
+	fmt.Println(<-defaultTicker.C)
+	//에러 발생 : fatal error: all goroutines are asleep - deadlock!
+	//nil Ticker의 Chan
 
-	//fmt.Println(<-nilTicker.C)
-	// segmentation err 발생! : invalid memory address or nil pointer dereference
+	fmt.Println(<-nilTicker.C)
+	//segmentation err 발생! : invalid memory address or nil pointer dereference
 }
